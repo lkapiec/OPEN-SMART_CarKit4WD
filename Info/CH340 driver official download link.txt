@@ -1,0 +1,5 @@
+CH340/CH341 USB to serial port Windows driver, supports 32/64-bit Windows 10/8.1/8/7/VISTA/XP, Server 2016/2012/2008/2003, 2000/ME/98:
+http://www.wch-ic.com/downloads/CH341SER_EXE.html
+
+CH340/CH341 USB to serial port MAC OS driver:
+http://www.wch-ic.com/downloads/CH341SER_MAC_ZIP.html
