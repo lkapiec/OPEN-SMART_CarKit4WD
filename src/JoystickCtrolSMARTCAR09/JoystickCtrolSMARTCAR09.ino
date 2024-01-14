@@ -1,7 +1,8 @@
 /*------------------------------------
 // Function: This is car control demo code for Wireless Joystick Remote to control the smart car.
-// IDE: Arduinio-1.8.7
+// IDE: Arduinio-2.2.1
 // Author: OPEN-SMART Team
+// Author: Lukasz Kapiec
 // Buy from: https://open-smart.aliexpress.com/store/1199788
 -------------------------------------*/
 
@@ -12,22 +13,11 @@ void (*resetFunc)(void) = 0; //software reset when the RF receiver can not respo
 
 int RF_RX_PIN = 9;   //the RF433 or RF315 receiver module connect with D9 pin of Easy IO Shield pro.
 int RF_TX_PIN = 10;  //fake pin
+
 #define TRANSMISION_SPEED 2000
 RH_ASK rh_driver(TRANSMISION_SPEED, RF_RX_PIN, RF_TX_PIN, 0);
 
 //Remote control code macro
-//#define CMD_INVALID 0
-//#define CMD_FORWARD 1
-//#define CMD_TURN_RIGHT 2
-//#define CMD_SLIDE_RIGHT 3
-//#define CMD_BACKWARD 4
-//#define CMD_TURN_LEFT 5
-//#define CMD_SLIDE_LEFT 6
-//#define CMD_STOP 7
-//#define CMD_SPEED_UP 8
-//#define CMD_SPEED_DOWN 9
-//#define CMD_JOYSTIC_BUTTON 10
-
 enum COMMAND_CONTROL {CMD_INVALID = 0, CMD_FORWARD, CMD_TURN_RIGHT, CMD_SLIDE_RIGHT, CMD_BACKWARD, 
 CMD_TURN_LEFT, CMD_SLIDE_LEFT,CMD_STOP, CMD_SPEED_UP,CMD_SPEED_DOWN,CMD_JOYSTIC_BUTTON};
 
