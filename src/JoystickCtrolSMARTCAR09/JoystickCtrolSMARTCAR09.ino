@@ -18,8 +18,17 @@ int RF_TX_PIN = 10;  //fake pin
 RH_ASK rh_driver(TRANSMISION_SPEED, RF_RX_PIN, RF_TX_PIN, 0);
 
 //Remote control code macro
-enum COMMAND_CONTROL {CMD_INVALID = 0, CMD_FORWARD, CMD_TURN_RIGHT, CMD_SLIDE_RIGHT, CMD_BACKWARD, 
-CMD_TURN_LEFT, CMD_SLIDE_LEFT,CMD_STOP, CMD_SPEED_UP,CMD_SPEED_DOWN,CMD_JOYSTIC_BUTTON};
+enum COMMAND_CONTROL { CMD_INVALID = 0,
+                       CMD_FORWARD,
+                       CMD_TURN_RIGHT,
+                       CMD_SLIDE_RIGHT,
+                       CMD_BACKWARD,
+                       CMD_TURN_LEFT,
+                       CMD_SLIDE_LEFT,
+                       CMD_STOP,
+                       CMD_SPEED_UP,
+                       CMD_SPEED_DOWN,
+                       CMD_JOYSTIC_BUTTON };
 
 #define XY_TOLERANCE 50
 #define X0 510  //Initial value of X-asix of the Joystick
@@ -40,10 +49,10 @@ uint8_t buffer[MAX_MESSAGE_LEN];  // buffer array for data recieve over serial p
 void setup() 
 {
   Serial.begin(115200);
-  
+
   motordriver.init(PWMA, PWMB, PWMC, PWMD);
   motordriver.setSpeed(speed0);
-  
+
   if (!rh_driver.init())
     Serial.println("RadioHead driver initialization failed!");
 }
@@ -61,59 +70,68 @@ void loop()
 }
 
 void controlCar(uint8_t cmd) 
-{  
+{
   switch (cmd) 
   {
     case CMD_FORWARD:
+      Serial.println("CMD_FORWARD");
       motordriver.goForward();
       break;
-    
+
     case CMD_TURN_RIGHT:
+      Serial.println("CMD_TURN_RIGHT");
       motordriver.turnRight();
       delay(100);
       motordriver.stop();
       break;
-    
+
     case CMD_SLIDE_RIGHT:
+      Serial.println("CMD_SLIDE_RIGHT");
       motordriver.slideRight();
       delay(200);
       break;
-    
-    case CMD_BACKWARD: 
-      motordriver.goBackward(); 
+
+    case CMD_BACKWARD:
+      Serial.println("CMD_BACKWARD");
+      motordriver.goBackward();
       break;
-    
+
     case CMD_SLIDE_LEFT:
+      Serial.println("CMD_SLIDE_LEFT");
       motordriver.slideLeft();
       delay(200);
       break;
-    
+
     case CMD_TURN_LEFT:
+      Serial.println("CMD_TURN_LEFT");
       motordriver.turnLeft();
       delay(100);
       motordriver.stop();
       break;
-    
-    case CMD_STOP: 
-      motordriver.stop(); 
+
+    case CMD_STOP:
+      Serial.println("CMD_STOP");
+      motordriver.stop();
       break;
-    
-    case CMD_SPEED_UP: 
-      speedUp(); 
+
+    case CMD_SPEED_UP:
+      Serial.println("CMD_SPEED_UP");
+      speedUp();
       break;
-    
-    case CMD_SPEED_DOWN: 
-      speedDown(); 
+
+    case CMD_SPEED_DOWN:
+      Serial.println("CMD_SPEED_DOWN");
+      speedDown();
       break;
-    
-    default: 
+
+    default:
       break;
   }
 }
 
 void speedUp() 
 {
-  if (speed0 < 236) 
+  if (speed0 < 236)
     speed0 += SPEED_STEPS;
   else speed0 = 255;
   motordriver.setSpeed(speed0);
@@ -134,7 +152,7 @@ uint8_t decode()
   uint8_t button;
   uint8_t joystic_button;
   uint8_t command = CMD_INVALID;
-    
+
   if ((buffer[0] != 0x7E) || (buffer[4] != 0xEF)) 
   {
     resetFunc();  //software reset
@@ -164,29 +182,29 @@ uint8_t decode()
 
   switch (button) 
   {
-    case 1: //K1 button
-      command = CMD_SPEED_UP; 
-      break;    
-    case 2: //K2 button;
-      command = CMD_TURN_RIGHT; 
+    case 1:  //K1 button
+      command = CMD_SPEED_UP;
       break;
-    case 3: //K3 button;
-      command = CMD_SPEED_DOWN; 
+    case 2:  //K2 button;
+      command = CMD_TURN_RIGHT;
       break;
-    case 4: //K4 button;
-      command = CMD_TURN_LEFT; 
+    case 3:  //K3 button;
+      command = CMD_SPEED_DOWN;
       break;
-    default: 
+    case 4:  //K4 button;
+      command = CMD_TURN_LEFT;
+      break;
+    default:
       break;
   }
-  
+
   clearBufferArray();
-  
+
   return command;
 }
 
 void clearBufferArray()  // function to clear buffer array
 {
-  for (int i = 0; i < buflen; i++) 
-    buffer[i] = 0; 
+  for (int i = 0; i < buflen; i++)
+    buffer[i] = 0;
 }

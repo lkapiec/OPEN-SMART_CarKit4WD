@@ -1,3 +1,11 @@
+/*------------------------------------
+// Function: This is Wireless Joystick Remote control.
+// IDE: Arduinio-2.2.1
+// Author: OPEN-SMART Team
+// Author: Lukasz Kapiec
+// Buy from: https://open-smart.aliexpress.com/store/...
+-------------------------------------*/
+
 #include "RH_ASK.h"
 #include <OS_JoystickCtrl.h>
 
@@ -7,13 +15,13 @@ JoystickCtrl remote;
 int RF_TX_PIN = 6;  //connect the sent module to D2 to use you can change it to the idle port you want.
 int RF_RX_PIN = 10;  //fake pin
 
-RH_ASK driver(TRANSMISION_SPEED, RF_RX_PIN, RF_TX_PIN, 0);
+RH_ASK rh_driver(TRANSMISION_SPEED, RF_RX_PIN, RF_TX_PIN, 0);
 
 void setup() 
 {
   Serial.begin(115200);
   remote.init();
-  if (!driver.init())
+  if (!rh_driver.init())
     Serial.println("init failed");
 }
 
@@ -39,8 +47,8 @@ void loop()
     buffer[2] = y;
     buffer[3] = z | button;
 
-    driver.send(buffer, BUFFER_LENGHT);
-    driver.waitPacketSent();
+    rh_driver.send(buffer, BUFFER_LENGHT);
+    rh_driver.waitPacketSent();
     delay(200);
   }
 }
