@@ -1,19 +1,14 @@
 // autor: Lukasz Kapiec
 // email: lkapiec@gmail.com
 // hardware: MT5STACK_M5Stick_CPlus_1.1 + MT5STACK_RD433T + MT5STACK_JoyC
-// not used yet joyc.btn0, joyc.btn1
 
 #include <M5StickCPlus.h>
 #include <Wire.h>
 #include "RH_ASK.h"
 #include "Hat_JoyC.h"
 
-#define JOY_ADDR 0x38
-
 int RF_RX_PIN = 33;  //the RF433 or RF315 receiver module connect with D9 pin of Easy IO Shield pro.
 int RF_TX_PIN = 32;  //fake pin
-
-const unsigned int BCKGRDCOL = M5.Lcd.color565(138, 235, 244);
 
 #define TRANSMISION_SPEED 2000
 RH_ASK rh_driver(TRANSMISION_SPEED, RF_RX_PIN, RF_TX_PIN, 0);
@@ -52,6 +47,10 @@ void setup() {
 
 #define SENS 10
 
+#define JOY_BTN_XY_TOLERANCE 20
+#define JOY_BTN_X0 100
+#define JOY_BTN_Y0 100
+
 uint8_t isChange() {
   uint8_t flag_change = 0;
 
@@ -59,54 +58,50 @@ uint8_t isChange() {
   if ((nowX0 < (preX0 - SENS)) || nowX0 > (preX0 + SENS)) {
     preX0 = nowX0;
     flag_change = 1;
-    Serial.println("SENS X0");
   }
 
   nowY0 = joyc.y0;
   if ((nowY0 < (preY0 - SENS)) || nowY0 > (preY0 + SENS)) {
     preY0 = nowY0;
     flag_change = 1;
-    Serial.println("SENS Y0");
   }
 
   nowX1 = joyc.x1;
   if ((nowX1 < (preX1 - SENS)) || nowX1 > (preX1 + SENS)) {
     preX1 = nowX1;
     flag_change = 1;
-    Serial.println("SENS X1");
   }
 
   nowY1 = joyc.y1;
   if ((nowY1 < (preY1 - SENS)) || nowY1 > (preY1 + SENS)) {
     preY1 = nowY1;
     flag_change = 1;
-    Serial.println("SENS Y1");
   }
 
   nowKey0 = joyc.btn0;
   if (nowKey0 != prevKey0) {
     prevKey0 = nowKey0;
     flag_change = 1;
-    Serial.println("SENS BTN0");
   }
 
-nowKey1 = joyc.btn1;
+  nowKey1 = joyc.btn1;
   if (nowKey1 != prevKey1) {
     prevKey1 = nowKey1;
     flag_change = 1;
-    Serial.println("SENS BTN1");
   }
 
   return flag_change;
 }
 
-void loop() {
-  //int8_t x_data, y_data, button_data;
+char info[100];
 
+#define JOY_BTN_XY_TOLERANCE 40
+#define JOY_BTN_X 100
+#define JOY_BTN_Y 100
+
+void loop() {
+  uint8_t button = 0;  //remote.nowkey;
   int x, y;
-  //uint8_t xh, xl, yh, yl;
-  uint8_t z;
-  char info[50];
 
   joyc.update();
 
@@ -115,23 +110,26 @@ void loop() {
     x = map(200 - nowX1, 0, 200, 0, 255);
     y = map(nowY1, 0, 200, 0, 255);
 
-    z = nowKey0;
-    z <<= 3;
-    uint8_t button = 0;  //remote.nowkey;
+    if (nowX0 < (JOY_BTN_X + JOY_BTN_XY_TOLERANCE) && nowX0 > (JOY_BTN_X - JOY_BTN_XY_TOLERANCE)) {
+      if (nowY0 > (JOY_BTN_Y + JOY_BTN_XY_TOLERANCE)) button = 1;
+      else if (nowY0 < (JOY_BTN_Y - JOY_BTN_XY_TOLERANCE)) button = 3;
+      else button = 0;
+    } else if (nowX0 < (JOY_BTN_X - JOY_BTN_XY_TOLERANCE))  // X < 80
+    {
+      if ((nowY0 < (JOY_BTN_Y + JOY_BTN_XY_TOLERANCE)) && (nowY0 > (JOY_BTN_Y - JOY_BTN_XY_TOLERANCE)))
+        button = 2;
+    } else  // x > 80
+    {
+      if ((nowY0 < (JOY_BTN_Y + JOY_BTN_XY_TOLERANCE)) && (nowY0 > (JOY_BTN_Y - JOY_BTN_XY_TOLERANCE)))
+        button = 4;
+    }
 
-    buffer[1] = x;
-    buffer[2] = y;
-    buffer[3] = (z << 3) | button;
+    buffer[1] = (uint8_t)x;
+    buffer[2] = (uint8_t)y;
+    buffer[3] = (uint8_t)(nowKey0 << 3) | button;
 
-
-    canvas.fillSprite(BLACK);  // Fill the canvas with black 填充画布为黑色
-    canvas.setCursor(0, 10);   // Set the cursor at (0,10) 设置光标在(0,10)
-    canvas.println("JoyC TEST");
-
-    sprintf(info, "X0: %d Y0: %d", buffer[1], buffer[2]);
-    canvas.println(info);
+    sprintf(info, "X0: %d Y0: %d BT0: %d, X1: %d Y1: %d BT1: %d, BTN: %d", nowX0, nowY0, nowKey0, nowX1, nowY1, nowKey1, button);
     Serial.println(info);
-    canvas.pushSprite(10, 0);
 
     rh_driver.send(buffer, BUFFER_LENGHT);
     rh_driver.waitPacketSent();
